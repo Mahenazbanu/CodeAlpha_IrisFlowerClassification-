@@ -1,49 +1,45 @@
-# 🌸 Iris Flower Classifier
+# 🌸 Iris Flower Classification
 
-A machine learning desktop application for classifying Iris flower species.  
-Built with **scikit-learn** and **tkinter** — runs on Android (Pydroid 3) and any desktop Python environment.
+A machine learning project that trains and compares five classification models on the classic Iris dataset and provides a **Gradio web interface** for real-time species prediction.
 
 ---
 
-## What It Does
-
-This project trains five classification models on the classic Iris dataset and provides a graphical interface for both training and real-time prediction.
+## What This Project Does
 
 **Training pipeline (`train_model.py`)**
 
-1. Loads `Iris.csv` and performs Exploratory Data Analysis (EDA)
-2. Preprocesses data — drops the `Id` column, removes duplicates, encodes labels, splits 80/20, and scales features with `StandardScaler`
-3. Trains five models: Logistic Regression, Decision Tree, Random Forest, K-Nearest Neighbors, and Support Vector Machine
-4. Evaluates each model with Accuracy, Precision, Recall, and F1-Score (weighted)
-5. Selects the best model by F1-Score and saves it (along with the scaler and label encoder) to a `.pkl` file using `joblib`
+1. Loads `Iris.csv` and prints Exploratory Data Analysis (EDA) statistics to the console
+2. Preprocesses the data — drops the `Id` column, removes duplicates, encodes labels with `LabelEncoder`, splits 80/20 with stratification, and scales features with `StandardScaler`
+3. Trains five classification models: Logistic Regression, Decision Tree, Random Forest, K-Nearest Neighbors, and Support Vector Machine
+4. Evaluates each model on the held-out test set using Accuracy, Precision, Recall, and F1-Score (all weighted)
+5. Selects the best model by weighted F1-Score and saves it — together with the fitted scaler and label encoder — to a `.pkl` file using `joblib`
 6. Generates and saves five visualisation plots to disk
 
-**GUI (`gui.py`)**
+**Web interface (`gui.py`)**
 
-- Three-tab interface: **Train**, **Predict**, and **Output Log**
-- Runs the full training pipeline in a background thread (UI stays responsive)
-- Loads any previously saved `.pkl` model for prediction without retraining
-- Accepts four flower measurements and returns the predicted species, confidence %, and per-class probabilities
-- Includes sample quick-fill buttons for all three species
-- Validates input ranges and warns on out-of-range values
-- Live console output is streamed to the Output Log tab in real time
+- Built with **Gradio** — runs in a browser at `http://localhost:7860`
+- Accepts four flower measurements (in cm) and returns the predicted species, confidence %, and per-class probabilities
+- Includes input validation with biological range checks
+- Requires the `.pkl` model file produced by `train_model.py` to be present before launching
 
 ---
 
 ## Project Files
 
 ```
-iris-classifier/
+CodeAlpha_IrisFlowerClassification-/
 ├── train_model.py      # ML pipeline — IrisClassifier class
-├── gui.py              # tkinter GUI application
+├── gui.py              # Gradio web application — IrisPredictor class
 ├── Iris.csv            # Dataset (required at runtime)
+├── requirements.txt    # Python dependencies
+├── LICENSE             # MIT licence
 └── README.md
 ```
 
-Files produced after training:
+Files produced after running `train_model.py`:
 
 ```
-iris_classifier.pkl         # Best model + scaler + label encoder
+iris_classifier.pkl         # Best model + scaler + label encoder (joblib dict)
 class_distribution.png
 feature_distributions.png
 pair_plot.png
@@ -56,252 +52,193 @@ model_comparison.png
 
 ## Requirements
 
-| Package        | Purpose                        |
-|----------------|--------------------------------|
-| `numpy`        | Numerical operations           |
-| `pandas`       | Data loading and manipulation  |
-| `scikit-learn` | ML models, preprocessing, metrics |
-| `matplotlib`   | Plot generation                |
-| `seaborn`      | Statistical visualisations     |
-| `joblib`       | Model serialisation            |
-| `tkinter`      | GUI framework (stdlib)         |
+- Python 3.8 or later
 
-`tkinter` is part of the Python standard library and does not need to be installed separately on desktop. On Pydroid 3 it is included in the app.
+| Package        | Minimum version | Purpose                           |
+|----------------|-----------------|-----------------------------------|
+| `pandas`       | 2.0.0           | Data loading and manipulation     |
+| `numpy`        | 1.24.0          | Numerical operations              |
+| `matplotlib`   | 3.7.0           | Plot generation                   |
+| `seaborn`      | 0.12.0          | Statistical visualisations        |
+| `scikit-learn` | 1.3.0           | ML models, preprocessing, metrics |
+| `gradio`       | 4.0.0           | Web interface                     |
+| `joblib`       | 1.3.0           | Model serialisation               |
 
 ### Install dependencies
 
 ```bash
-pip install numpy pandas scikit-learn matplotlib seaborn joblib
-```
-
-Or from a requirements file:
-
-```bash
 pip install -r requirements.txt
-```
-
-**requirements.txt**
-
-```
-numpy
-pandas
-scikit-learn
-matplotlib
-seaborn
-joblib
 ```
 
 ---
 
 ## Dataset
 
-The project expects `Iris.csv` with the following columns:
+The project expects `Iris.csv` in the same directory as the scripts. The file must have these columns:
 
-| Column          | Type    | Description                  |
-|-----------------|---------|------------------------------|
-| `Id`            | int     | Row identifier (dropped during preprocessing) |
-| `SepalLengthCm` | float   | Sepal length in centimetres  |
-| `SepalWidthCm`  | float   | Sepal width in centimetres   |
-| `PetalLengthCm` | float   | Petal length in centimetres  |
-| `PetalWidthCm`  | float   | Petal width in centimetres   |
-| `Species`       | string  | Target class (Iris-setosa / Iris-versicolor / Iris-virginica) |
+| Column          | Type   | Description                                                        |
+|-----------------|--------|--------------------------------------------------------------------|
+| `Id`            | int    | Row identifier — dropped during preprocessing                      |
+| `SepalLengthCm` | float  | Sepal length in centimetres                                        |
+| `SepalWidthCm`  | float  | Sepal width in centimetres                                         |
+| `PetalLengthCm` | float  | Petal length in centimetres                                        |
+| `PetalWidthCm`  | float  | Petal width in centimetres                                         |
+| `Species`       | string | Target class: `Iris-setosa`, `Iris-versicolor`, or `Iris-virginica` |
 
-The dataset contains **150 samples**, 50 per species.  
-Source: [Kaggle — Iris Flower Dataset](https://www.kaggle.com/datasets/uciml/iris)
+The dataset contains 150 samples, 50 per species.  
+Source: [Kaggle — UCI Iris Dataset](https://www.kaggle.com/datasets/uciml/iris)
 
 ---
 
 ## Usage
 
-### Running the GUI (recommended)
-
-Place `gui.py`, `train_model.py`, and `Iris.csv` in the same folder, then run:
-
-```bash
-python gui.py
-```
-
-#### On Pydroid 3 (Android)
-1. Install **Pydroid 3** from the Play Store
-2. Open Pydroid 3's pip installer and install the packages listed above
-3. Copy `gui.py`, `train_model.py`, and `Iris.csv` into the same directory
-4. Open `gui.py` in Pydroid 3 and tap **Run**
-
-#### On Desktop (VS Code, terminal, IDLE)
-
-```bash
-python gui.py
-```
-
-Or, if you have multiple Python versions:
-
-```bash
-python3 gui.py
-```
-
----
-
-### GUI Walkthrough
-
-**Train tab**
-
-1. Set the path to `Iris.csv` (defaults to the current directory)
-2. Set the output path for the saved model (defaults to `iris_classifier.pkl`)
-3. Toggle EDA output and plot saving as needed
-4. Click **▶ Start Training Pipeline**
-5. Switch to the **Output Log** tab to watch live training output
-6. Results summary appears in the Train tab once complete
-
-**Predict tab**
-
-- If you have just trained a model, it is available in memory immediately — no need to load a file
-- To use a previously saved model, enter the `.pkl` path and click **Load Model**
-- Enter four measurements (in centimetres) or use a **Quick fill** button to pre-populate a sample
-- Click **🔍 Predict Species** to see the predicted species, confidence %, and per-class probabilities
-
-**Output Log tab**
-
-All `print()` output from both training and prediction is streamed here in real time. Use **Clear Log** to reset it.
-
----
-
-### Running the training script directly (no GUI)
+### Step 1 — Train the models
 
 ```bash
 python train_model.py
 ```
 
-This calls `IrisClassifier.run_full_pipeline()`, which runs the complete pipeline and saves the model to `iris_classifier.pkl` in the current directory.
+This runs the full pipeline and saves `iris_classifier.pkl` and the six plot files to the current directory. All EDA output and evaluation metrics are printed to the console.
 
----
-
-### Using `IrisClassifier` programmatically
+You can also use the `IrisClassifier` class directly:
 
 ```python
 from train_model import IrisClassifier
 
-# Train
 clf = IrisClassifier(data_path="Iris.csv", random_state=42)
 clf.run_full_pipeline(save_model_path="iris_classifier.pkl")
 
-# Predict with the trained model (in memory)
+# Predict with the in-memory trained model
 result = clf.predict(
     sepal_length=5.1,
     sepal_width=3.5,
     petal_length=1.4,
     petal_width=0.2
 )
-print(result["predicted_species"])   # e.g. Iris-setosa
-print(result["confidence"])          # e.g. 99.87
+print(result["predicted_species"])  # e.g. Iris-setosa
+print(result["confidence"])         # e.g. 99.87
 
-# Load a saved model and predict
+# Or load a saved model and predict
 model_data = IrisClassifier.load_model("iris_classifier.pkl")
 result = clf.predict(5.1, 3.5, 1.4, 0.2, model_data=model_data)
 ```
+
+### Step 2 — Launch the web interface
+
+**`iris_classifier.pkl` must exist before running this step.**
+
+```bash
+python gui.py
+```
+
+Open `http://localhost:7860` in your browser. Enter four measurements and click **Predict Species**.
+
+> The Gradio server binds to `0.0.0.0:7860` with `share=False`. To create a temporary public link, set `share=True` in `gui.py`'s `demo.launch()` call.
 
 ---
 
 ## Models Trained
 
-| Model                    | Parameters used                                      |
-|--------------------------|------------------------------------------------------|
-| Logistic Regression      | `max_iter=1000`, `multi_class='ovr'`                 |
-| Decision Tree            | `max_depth=5`, `min_samples_split=5`                 |
-| Random Forest            | `n_estimators=100`, `max_depth=5`                    |
-| K-Nearest Neighbors      | `n_neighbors=5`, `weights='uniform'`                 |
-| Support Vector Machine   | `kernel='rbf'`, `probability=True`, `C=1.0`          |
+| Model                  | Parameters used                              |
+|------------------------|----------------------------------------------|
+| Logistic Regression    | `max_iter=1000`, `multi_class='ovr'`         |
+| Decision Tree          | `max_depth=5`, `min_samples_split=5`         |
+| Random Forest          | `n_estimators=100`, `max_depth=5`            |
+| K-Nearest Neighbors    | `n_neighbors=5`, `weights='uniform'`         |
+| Support Vector Machine | `kernel='rbf'`, `probability=True`, `C=1.0` |
 
-All models use `random_state=42` where applicable. The best model is selected by weighted F1-Score.
+All models use `random_state=42` where applicable. The best model is selected by weighted F1-Score on the test set.
 
 ---
 
 ## Evaluation Metrics
 
-Each model is evaluated on the held-out test set (20% of data, stratified split):
+Each model is evaluated on the held-out test set (20% of the data, stratified split):
 
 - **Accuracy** — fraction of correctly classified samples
-- **Precision** — weighted average across classes
-- **Recall** — weighted average across classes
+- **Precision** — weighted average across the three classes
+- **Recall** — weighted average across the three classes
 - **F1-Score** — weighted harmonic mean of precision and recall
-- **Confusion Matrix** — per-class prediction breakdown
-- **Classification Report** — per-class precision, recall, and F1
+- **Confusion Matrix** — printed to console per model
+- **Classification Report** — per-class breakdown printed to console
 
 ---
 
 ## Visualisations Generated
 
-| File                        | Content                                      |
-|-----------------------------|----------------------------------------------|
-| `class_distribution.png`    | Bar chart of sample counts per species       |
-| `feature_distributions.png` | Histograms of all four features              |
-| `pair_plot.png`             | Seaborn pair plot coloured by species        |
-| `correlation_heatmap.png`   | Pearson correlation matrix of features       |
-| `box_plots.png`             | Box plots of each feature grouped by species |
-| `model_comparison.png`      | Grouped bar chart of all model metrics       |
+| File                        | Content                                        |
+|-----------------------------|------------------------------------------------|
+| `class_distribution.png`    | Bar chart of sample counts per species         |
+| `feature_distributions.png` | Histograms of all four features                |
+| `pair_plot.png`             | Seaborn pair plot coloured by species          |
+| `correlation_heatmap.png`   | Pearson correlation matrix of the four features|
+| `box_plots.png`             | Box plots of each feature grouped by species   |
+| `model_comparison.png`      | Grouped bar chart comparing all model metrics  |
 
 ---
 
 ## Saved Model Format
 
-The `.pkl` file is a dictionary serialised with `joblib.dump` and contains:
+`iris_classifier.pkl` is a Python dictionary serialised with `joblib.dump`:
 
-| Key             | Content                                      |
-|-----------------|----------------------------------------------|
-| `model`         | Trained scikit-learn estimator               |
-| `model_name`    | String name of the best model                |
-| `scaler`        | Fitted `StandardScaler`                      |
-| `label_encoder` | Fitted `LabelEncoder`                        |
-| `feature_names` | `['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']` |
-| `random_state`  | `42`                                         |
+| Key             | Content                                                                   |
+|-----------------|---------------------------------------------------------------------------|
+| `model`         | Trained scikit-learn estimator (best model)                               |
+| `model_name`    | String name of the best model                                             |
+| `scaler`        | Fitted `StandardScaler`                                                   |
+| `label_encoder` | Fitted `LabelEncoder`                                                     |
+| `feature_names` | `['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']`    |
+| `random_state`  | `42`                                                                      |
 
 ---
 
-## Project Structure Details
+## Code Structure
 
 ### `train_model.py` — `IrisClassifier` class
 
-| Method                  | Description                                            |
-|-------------------------|--------------------------------------------------------|
-| `load_data()`           | Reads `Iris.csv` into a DataFrame                      |
-| `explore_data()`        | Prints EDA statistics to stdout                        |
-| `visualize_data()`      | Generates and saves all six plots                      |
-| `preprocess_data()`     | Cleans, encodes, splits, and scales the data           |
-| `initialize_models()`   | Creates the five model instances                       |
-| `train_models()`        | Fits all models on the training set                    |
-| `evaluate_models()`     | Computes and prints metrics for each model             |
-| `compare_models()`      | Prints a comparison table and identifies the best model |
-| `plot_model_comparison()` | Saves the model comparison bar chart               |
-| `save_model()`          | Persists the best model bundle to disk                 |
-| `load_model()`          | Static method — loads a saved model bundle             |
-| `predict()`             | Returns species prediction and probabilities           |
-| `run_full_pipeline()`   | Runs all steps end-to-end                              |
+| Method                    | Description                                              |
+|---------------------------|----------------------------------------------------------|
+| `load_data()`             | Reads `Iris.csv` into a DataFrame                        |
+| `explore_data()`          | Prints EDA statistics to stdout                          |
+| `visualize_data()`        | Generates and saves the five EDA plots                   |
+| `preprocess_data()`       | Cleans, encodes, splits, and scales the data             |
+| `initialize_models()`     | Creates the five model instances                         |
+| `train_models()`          | Fits all models on the training set                      |
+| `evaluate_models()`       | Computes and prints metrics for each model               |
+| `compare_models()`        | Prints a comparison table and identifies the best model  |
+| `plot_model_comparison()` | Saves the model comparison bar chart                     |
+| `save_model()`            | Persists the best model bundle to disk                   |
+| `load_model()`            | Static method — loads a saved model bundle from disk     |
+| `predict()`               | Returns species prediction, confidence, and probabilities|
+| `run_full_pipeline()`     | Runs all steps end-to-end                                |
 
-### `gui.py` — `IrisApp` class
+### `gui.py` — `IrisPredictor` class + Gradio interface
 
-Built with `tkinter` and `tkinter.ttk`. Uses `threading.Thread` to run training without blocking the UI. Redirects `sys.stdout` and `sys.stderr` to the Output Log tab so all print output from `train_model.py` appears in the GUI.
+| Component         | Description                                                              |
+|-------------------|--------------------------------------------------------------------------|
+| `IrisPredictor`   | Loads the `.pkl` file and exposes a `predict()` method with validation   |
+| `classify_iris()` | Gradio-facing function — validates inputs, calls predictor, formats output|
+| `create_interface()` | Builds and returns the `gr.Blocks` layout                            |
+| `main()`          | Launches the Gradio server on `0.0.0.0:7860`                            |
 
 ---
 
 ## Troubleshooting
 
 **`FileNotFoundError: Dataset not found at: Iris.csv`**  
-Make sure `Iris.csv` is in the same folder as `gui.py` and `train_model.py`, or use the Browse button to select its full path.
+Ensure `Iris.csv` is in the same directory as `train_model.py` when you run the script, or pass the full path: `IrisClassifier(data_path="/path/to/Iris.csv")`.
 
-**`ModuleNotFoundError: No module named 'sklearn'`** (or similar)  
-Run `pip install scikit-learn` (and the other packages listed in Requirements).
+**`FileNotFoundError: Model file not found: iris_classifier.pkl`**  
+Run `python train_model.py` first to generate the model file before launching `gui.py`.
 
-**Plots not appearing on Pydroid 3**  
-The scripts save plots to disk rather than displaying them with `plt.show()`. Check the folder where the model was saved for `.png` files.
+**`ModuleNotFoundError: No module named 'gradio'`** (or any other package)  
+Run `pip install -r requirements.txt` to install all dependencies.
 
-**`tkinter` not available**  
-On some Linux distributions, tkinter is a separate package. Install it with:
-```bash
-sudo apt-get install python3-tk   # Debian/Ubuntu
-```
-On Pydroid 3, tkinter is bundled and requires no extra installation.
+**Plots are saved but not displayed**  
+The scripts save plots to disk with `plt.savefig()` rather than calling `plt.show()`. Look for `.png` files in the directory where you ran `train_model.py`.
 
 ---
 
 ## License
 
-MIT License — free to use and modify.
+MIT License — see [LICENSE](LICENSE) for details.
